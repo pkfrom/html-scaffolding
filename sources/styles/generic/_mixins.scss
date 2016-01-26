@@ -1,0 +1,187 @@
+////
+/// @author Yann Le Corre
+////
+
+/// @name align-middle
+/// @group Alignment
+/// @link https://css-tricks.com/centering-css-complete-guide/
+@mixin align-middle() {
+    position  : absolute;
+    top       : 50%;
+    transform : translateY(-50%);
+}
+/// @name text-midle
+/// @group Alignment
+/// @link https://css-tricks.com/centering-css-complete-guide/
+@mixin text-middle{
+    display: table-cell;
+    vertical-align: middle;
+}
+
+/// Micro Clearfix
+/// @group Clearfix
+/// @name clearfix
+/// @link http://nicolasgallagher.com/micro-clearfix-hack/
+@mixin clearfix() {
+    *zoom: 1;
+
+    &:before,
+    &:after {
+        content: "";
+        display: table;
+    }
+    &:after {
+        clear: both;
+    }
+}
+
+/// @name text-truncate
+@mixin text-truncate {
+    overflow      : hidden;
+    text-overflow : ellipsis;
+    white-space   : nowrap;
+}
+
+
+/// Offscreen Text
+/// @name linkTextOffscreen
+/// @link https://css-tricks.com/redesigning-with-sass
+@mixin linkTextOffscreen() {
+    text-indent     : -9999px;
+    overflow        : hidden;
+    text-decoration : none;
+    display         : block;
+    font-size       : 0;
+    text-align      : start;
+}
+
+/// IE treats "height" how "min-height" is supposed to be treated.
+/// @name minHeight
+/// @param {String} $val [100px] - height in px
+@mixin minHeight($val:100px){
+    min-height : $val;
+    height     :auto !important;
+    height     : $val;
+}
+
+
+/// REM Mixin with px fallback
+/// @group REM
+@function parseInt($n) {
+  @return $n / ($n * 0 + 1);
+}
+/// @group REM
+/// @name rem
+/// @param {String} $property - property to apply the $values
+/// @param {String} $values - values to be applied as per CSS format
+/// @example
+///     body {
+///       @include rem(font-size, 1.6rem);
+///       @include rem(padding, 20px 10px);
+///     }
+///
+/// @output
+///    body {
+///
+///        font-size: 16px;
+///
+///        font-size: 1.6rem;
+///
+///        padding: 20px 10px;
+///
+///        padding: 2rem 1rem;
+///
+///    }
+@mixin rem($property, $values) {
+  $px : ();
+  $rem: ();
+
+  @each $value in $values {
+
+    @if $value == 0 or $value == auto {
+      $px : append($px , $value);
+      $rem: append($rem, $value);
+    }
+
+    @else {
+      $unit: unit($value);
+      $val: parseInt($value);
+
+      @if $unit == "px" {
+        $px : append($px,  $value);
+        $rem: append($rem, ($val / 10 + rem));
+      }
+
+      @if $unit == "rem" {
+        $px : append($px,  ($val * 10 + px));
+        $rem: append($rem, $value);
+      }
+    }
+  }
+
+  @if $px == $rem {
+    #{$property}: $px;
+  } @else {
+    #{$property}: $px;
+    #{$property}: $rem;
+  }
+}
+
+
+/// BEM Constructor
+/// <elem class="block block--modifier">
+///   <elem class="block__element" />
+///   <elem class="block__element block__element--modifier" />
+/// </elem>
+/// @group BEM
+/// @name element
+/// @param {String} $element - Element's name
+///
+/// @example
+///  .menu {
+///      @include e('item') {
+///        @include m('is-active') {}
+///      }
+///      @include m('is-hidden') {}
+///  }
+///
+/// @output
+///    .menu{}
+///
+///    .menu__item{}
+///
+///    .menu__item--is-active{}
+///
+///    .menu--is-hidden{}
+///
+@mixin element($element) {
+    &__#{$element} {
+        @content;
+    }
+}
+
+
+/// @name e
+/// @alias element
+@mixin e($element) {
+    @include element($element)  {
+        @content;
+    }
+}
+
+/// @group BEM
+/// @name modifier
+/// @param {String} $modifier - Modifier's name
+@mixin modifier($modifier) {
+    &--#{$modifier} {
+        @content;
+    }
+}
+/// @group BEM
+/// @name m
+/// @alias modifier
+@mixin m($modifier) {
+    @include modifier($modifier) {
+        @content;
+    }
+}
